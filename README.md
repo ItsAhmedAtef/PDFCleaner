@@ -1,10 +1,10 @@
 # PDFCleaner
-Python Script to remove PDF tags
+Python Script to remove PDF metadata
 
 ### Overview
-- Simple Python libraries
-- Original PDF will not be edited
-- New file will be created with unwanted chosen tags
+- Simple Python libraries, Just "sys" and "os".
+- Original PDF will not be edited.
+- New file will be created with unwanted chosen metadata tags.
 - You can remove PDF [ Title - Producer - Author - Creator ] tags
 
 ### Usage
