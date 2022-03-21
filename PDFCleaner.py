@@ -1,12 +1,28 @@
 #!/usr/bin/env python3
 
 ###################
+from ast import keyword
+from encodings import utf_8
 import sys
 import os
 ###################
 
 argv = sys.argv
 allowed_parameters = ["--all","--title","--creator","--author","--producer"]
+
+def handle_replace(binary_keyword, line):
+    # ex: b"/Author" in this binary line
+    if binary_keyword in line:
+        # split the line
+        keyword_split = str(line).split(binary_keyword.decode())
+        # check if the complete code is in the same line, avoid out of range errors
+        if ( (len(keyword_split) > 0) and (len(keyword_split[1].split("(")) > 0) and (len(keyword_split[1].split("(")[1].split(")")) > 0) ):
+            # cuted string content value
+            keyword_content = keyword_split[1].split("(")[1].split(")")[0]
+            keyword_code = binary_keyword + line.split(binary_keyword)[1].split(b")")[0] + b")"
+            line =  line.replace( keyword_code, binary_keyword + b"()" )
+            print( binary_keyword.decode()[1:] + ": \"" + keyword_content + "\" (deleted)")
+            return line
 
 def clean( file, list_arguments ):
     file_path, filename = os.path.split(file)
@@ -23,38 +39,35 @@ def clean( file, list_arguments ):
         original_file.close()
         sys.exit("Error: directory " + file_path + " is not writable!")
     ##############################
-    found_first_title = False
+    title_not_found = True
+    creator_not_found = True
+    author_not_found = True
+    producer_not_found = True
     for line in original_file:
         ##### ##### Title ##### #####
-        if ("--all" in list_arguments or "--title" in list_arguments):
-            if (found_first_title == False):
-                if "/Title(".encode("unicode-escape") in line:
-                    found_first_title = True
-                    Title = line.decode("unicode-escape").split("/Title(")[1].split(")")[0]
-                    title_code = "/Title("+Title+")"
-                    line = line.replace(title_code.encode(), b"/Title()")
-                    print("Title: \"" + Title + "\" (deleted)")
+        if (("--all" in list_arguments or "--title" in list_arguments) and title_not_found):
+            check = handle_replace(b"/Title", line)
+            if (check != None):
+                line = check
+                title_not_found = False
         ##### ##### Creator ##### #####
-        if ("--all" in list_arguments or "--creator" in list_arguments):
-            if "/Creator(".encode("unicode-escape") in line:
-                Creator = line.decode("unicode-escape").split("/Creator(")[1].split(")")[0]
-                creator_code = "/Creator("+Creator+")"
-                line = line.replace(creator_code.encode(), b"/Creator()")
-                print("Creator: \"" + Creator + "\" (deleted)")
+        if (("--all" in list_arguments or "--creator" in list_arguments) and creator_not_found):
+            check = handle_replace(b"/Creator", line)
+            if (check != None):
+                line = check
+                creator_not_found = False
         ##### ##### Author ##### #####
-        if ("--all" in list_arguments or "--author" in list_arguments):
-            if "/Author(".encode("unicode-escape") in line:
-                Author = line.decode("unicode-escape").split("/Author(")[1].split(")")[0]
-                author_code = "/Author("+Author+")"
-                line = line.replace(author_code.encode(), b"/Author()")
-                print("Author: \"" + Author + "\" (deleted)")
+        if (("--all" in list_arguments or "--author" in list_arguments) and author_not_found):
+            check = handle_replace(b"/Author", line)
+            if (check != None):
+                line = check
+                author_not_found = False
         ##### ##### Producer ##### #####
-        if ("--all" in list_arguments or "--producer" in list_arguments):
-            if "/Producer(".encode("unicode-escape") in line:
-                Producer = line.decode("unicode-escape").split("/Producer(")[1].split(")")[0]
-                producer_code = "/Producer("+Producer+")"
-                line = line.replace(producer_code.encode(), b"/Producer()")
-                print("Producer: \"" + Producer + "\" (deleted)")
+        if (("--all" in list_arguments or "--producer" in list_arguments) and producer_not_found):
+            check = handle_replace(b"/Producer", line)
+            if (check != None):
+                line = check
+                producer_not_found = False
         new_file.write(line)
     ##############################
     original_file.close()
