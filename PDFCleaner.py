@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 ###################
-from ast import keyword
-from encodings import utf_8
 import sys
 import os
 ###################
