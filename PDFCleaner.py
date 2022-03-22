@@ -11,16 +11,41 @@ allowed_parameters = ["--all","--title","--creator","--author","--producer"]
 def handle_replace(binary_keyword, line):
     # ex: b"/Author" in this binary line
     if binary_keyword in line:
-        # split the line
-        keyword_split = str(line).split(binary_keyword.decode())
-        # check if the complete code is in the same line, avoid out of range errors
-        if ( (len(keyword_split) > 0) and (len(keyword_split[1].split("(")) > 0) and (len(keyword_split[1].split("(")[1].split(")")) > 0) ):
-            # cuted string content value
-            keyword_content = keyword_split[1].split("(")[1].split(")")[0]
-            keyword_code = binary_keyword + line.split(binary_keyword)[1].split(b")")[0] + b")"
-            line =  line.replace( keyword_code, binary_keyword + b"()" )
-            print( binary_keyword.decode()[1:] + ": \"" + keyword_content + "\" (deleted)")
-            return line
+        splited = line.split(binary_keyword)[1]
+        
+        keyword_content = bytearray()
+        keyword_code = binary_keyword
+        index = 0
+        opened = False
+        closed = False
+        escaped = False
+        for i in splited:
+            if ( opened and closed==False ):
+                if ( splited[index:].startswith(b")") ):
+                    if ( not escaped ):
+                        closed=True
+                    else:
+                        keyword_content.append(i)
+                else:
+                    keyword_content.append(i)
+                
+                if (escaped):
+                    escaped=False
+                else:
+                    if ( splited[index:].startswith(b"\\") ):
+                        escaped=True
+            elif ( opened==False and closed==False ):
+                if (splited[index:].startswith(b"(")):
+                    opened=True
+                else:
+                    keyword_code += b" "
+            index +=1
+        
+        keyword_code += b"(" + keyword_content + b")"
+        line =  line.replace( keyword_code, binary_keyword + b"()" )
+        keyword_content = keyword_content.decode(encoding="utf-8", errors="igonre")
+        print( binary_keyword.decode()[1:] + ": \"" + keyword_content + "\" (deleted)")
+        return line
 
 def clean( file, list_arguments ):
     file_path, filename = os.path.split(file)
