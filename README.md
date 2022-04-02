@@ -1,5 +1,5 @@
 # PDFCleaner
-Python Script to remove PDF metadata
+Python script to remove PDF metadata tags
 
 ### Overview
 - Simple Python libraries, Just "sys" and "os".
