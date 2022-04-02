@@ -5,6 +5,21 @@ import sys
 import os
 ###################
 
+# for CMD colored output
+os.system("color")
+
+def red(string):
+    return  "\x1b[31m" + string + "\x1b[0m"
+
+def yellow(string):
+    return  "\x1b[33m" + string + "\x1b[0m"
+
+def green(string):
+    return  "\x1b[32m" + string + "\x1b[0m"
+
+def blue(string):
+    return  "\x1b[34m" + string + "\x1b[0m"
+
 argv = sys.argv
 allowed_parameters = ["--all","--title","--creator","--author","--producer"]
 
@@ -43,8 +58,8 @@ def handle_replace(binary_keyword, line):
         
         keyword_code += b"(" + keyword_content + b")"
         line =  line.replace( keyword_code, binary_keyword + b"()" )
-        keyword_content = keyword_content.decode(encoding="utf-8", errors="igonre")
-        print( binary_keyword.decode()[1:] + ": \"" + keyword_content + "\" (deleted)")
+        keyword_content = keyword_content.decode(encoding="utf-8", errors="ignore")
+        print( blue(binary_keyword.decode()[1:]) + ": \"" + keyword_content + "\" " + red("(deleted)"))
         return line
 
 def clean( file, list_arguments ):
@@ -54,13 +69,17 @@ def clean( file, list_arguments ):
     try:
         original_file = open( file, "rb")
     except:
-        sys.exit("Error: Couldn't read \"" + file + "\" file!")
+        sys.exit(red("Error: Couldn't read \"" + file + "\" file!"))
     try:
         new_file = open( new_path_name, "wb")
-        print("Created new file " + new_name)
+        print(green("Output saved in ") + new_path_name)
     except:
         original_file.close()
-        sys.exit("Error: directory " + file_path + " is not writable!")
+        if file_path:
+            print(file_path)
+            sys.exit(red("Error: Directory " + file_path + " is not writable!"))
+        else:
+            sys.exit(red("Error: The current directory is not writable!"))
     ##############################
     title_not_found = True
     creator_not_found = True
@@ -95,33 +114,28 @@ def clean( file, list_arguments ):
     ##############################
     original_file.close()
     new_file.close()
-    sys.exit("Finished")
+    sys.exit(green("Finished"))
 
 def detect_argv(file):
     del argv[1] # remove this the bigger index first
     del argv[0]
+    hold_list_arguments = []
     if ( argv ):
-        hold_list_arguments = []
         for parameter in argv:
             if (parameter in allowed_parameters):
                 hold_list_arguments.append(parameter)
             else:
-                print("Warning: Unknown argument \"" + parameter + "\"")
-        if ("--all" in hold_list_arguments):
-            # if --all is provided ? then no need to anything else
-            hold_list_arguments = ["--all"]
-        clean(file, hold_list_arguments)
-    else:
-        clean(file, ["--all"])
+                print(yellow("Warning: Unknown argument \"" + parameter + "\""))
+    clean(file, hold_list_arguments)
 
 if ( len(argv) > 1 ):
     file = argv[1]
     if ( os.path.exists(file) and os.path.isfile(file) ):
         if (os.path.splitext(file)[1] != ".pdf"):
             # bad extension
-            sys.exit("Error: \"" + file + "\" is not a PDF file!")
+            sys.exit(red("Error: \"" + file + "\" is not a PDF file!"))
         detect_argv(file)
     else:
-        sys.exit("Error: Couldn't read \"" + file + "\" file!")
+        sys.exit(red("Error: Couldn't read \"" + file + "\" file!"))
 else:
-    sys.exit("Error: No arguments provided!")
+    sys.exit(red("Error: No arguments provided!"))
