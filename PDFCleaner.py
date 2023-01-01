@@ -9,16 +9,16 @@ import os
 os.system("color")
 
 def red(string):
-    return  "\x1b[31m" + string + "\x1b[0m"
+    return "\x1b[31m" + string + "\x1b[0m"
 
 def yellow(string):
-    return  "\x1b[33m" + string + "\x1b[0m"
+    return "\x1b[33m" + string + "\x1b[0m"
 
 def green(string):
-    return  "\x1b[32m" + string + "\x1b[0m"
+    return "\x1b[32m" + string + "\x1b[0m"
 
 def blue(string):
-    return  "\x1b[34m" + string + "\x1b[0m"
+    return "\x1b[34m" + string + "\x1b[0m"
 
 argv = sys.argv
 allowed_parameters = ["--all","--title","--creator","--author","--producer"]
